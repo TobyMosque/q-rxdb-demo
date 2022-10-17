@@ -22,31 +22,23 @@ export default boot(async ({ app, store }) => {
     storage: getRxStorageDexie(),
   });
 
+  function defaultStrategy(oldDoc) {
+    return oldDoc;
+  }
+
+  function getOptions(schema, strategy = defaultStrategy) {
+    return {
+      schema: schema,
+      migrationStrategies: {
+        [schema.version]: strategy,
+      },
+    };
+  }
+
   await db.addCollections({
-    person: {
-      schema: personSchema,
-      migrationStrategies: {
-        [personSchema.version](oldDoc) {
-          return oldDoc;
-        },
-      },
-    },
-    job: {
-      schema: jobSchema,
-      migrationStrategies: {
-        [jobSchema.version](oldDoc) {
-          return oldDoc;
-        },
-      },
-    },
-    company: {
-      schema: companySchema,
-      migrationStrategies: {
-        [companySchema.version](oldDoc) {
-          return oldDoc;
-        },
-      },
-    },
+    person: getOptions(personSchema),
+    job: getOptions(jobSchema),
+    company: getOptions(companySchema),
   });
 
   await seed(db);
