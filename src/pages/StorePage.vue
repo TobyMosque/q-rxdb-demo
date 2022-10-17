@@ -5,7 +5,7 @@
   </q-page>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { storeToRefs } from 'pinia';
 import { useDatabaseStore } from 'src/stores/database';
 

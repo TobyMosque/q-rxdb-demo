@@ -1,10 +1,4 @@
-import {
-  toTypedRxJsonSchema,
-  ExtractDocumentTypeFromTypedRxJsonSchema,
-  RxJsonSchema,
-} from 'rxdb';
-
-const personSchemaLiteral = {
+export const personSchema = {
   title: 'person schema',
   description: 'describes a person',
   version: 0,
@@ -53,11 +47,4 @@ const personSchemaLiteral = {
     '_deleted',
   ],
   indexes: ['company', 'job', 'firstName', 'email', '_deleted', 'updatedAt'],
-} as const; // <- It is important to set 'as const' to preserve the literal type
-const schemaTyped = toTypedRxJsonSchema(personSchemaLiteral);
-
-// aggregate the document type from the schema
-export type Person = ExtractDocumentTypeFromTypedRxJsonSchema<
-  typeof schemaTyped
->;
-export const personSchema: RxJsonSchema<Person> = personSchemaLiteral;
+};

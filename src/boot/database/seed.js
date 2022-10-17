@@ -1,9 +1,5 @@
-import { Database } from '../database';
 import { faker } from '@faker-js/faker';
 import { uid } from 'quasar';
-import { Company } from 'src/modals/Company';
-import { Job } from 'src/modals/Job';
-import { Person } from 'src/modals/Person';
 
 const _date = new Date();
 const avatars = {
@@ -24,7 +20,7 @@ const avatars = {
   lego: [1, 2, 3, 4, 5, 6, 7, 8],
 };
 
-export function comb({ date }: { date?: Date } = {}) {
+export function comb({ date } = {}) {
   if (!date) {
     _date.setTime(_date.getTime() + 1);
     date = _date;
@@ -35,11 +31,11 @@ export function comb({ date }: { date?: Date } = {}) {
   return uuid.replace(uuid.slice(0, 13), comb);
 }
 
-export async function seed(db: Database) {
-  debugger;
+export async function seed(db) {
+  // debugger;
   const companyDocs = await db.company.find({ limit: 1 }).exec();
   if (!companyDocs?.length) {
-    const companies: Company[] = [];
+    const companies = [];
     for (let i = 0; i < 50; i++) {
       let name = faker.company.companyName();
       while (companies.some((j) => j.name === name)) {
@@ -57,7 +53,7 @@ export async function seed(db: Database) {
 
   const jobDocs = await db.job.find({ limit: 1 }).exec();
   if (!jobDocs?.length) {
-    const jobs: Job[] = [];
+    const jobs = [];
     for (let i = 0; i < 50; i++) {
       let name = faker.name.jobTitle();
       while (jobs.some((j) => j.name === name)) {
@@ -75,10 +71,10 @@ export async function seed(db: Database) {
 
   const peopleDocs = await db.person.find({ limit: 1 }).exec();
   if (!peopleDocs?.length) {
-    const jobs: Job[] = await db.job.find().exec();
-    const companies: Company[] = await db.company.find().exec();
+    const jobs = await db.job.find().exec();
+    const companies = await db.company.find().exec();
 
-    const people: Person[] = [];
+    const people = [];
     for (let i = 0; i < 800; i++) {
       const companyIndex = Math.floor(
         Math.random() * Math.floor(companies.length)
@@ -87,10 +83,7 @@ export async function seed(db: Database) {
       const company = companies[companyIndex];
       const job = jobs[jobIndex];
 
-      const gender: 'male' | 'female' = faker.helpers.arrayElement([
-        'male',
-        'female',
-      ]);
+      const gender = faker.helpers.arrayElement(['male', 'female']);
 
       let firstName = faker.name.firstName(gender);
       let lastName = faker.name.lastName(gender);

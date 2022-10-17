@@ -1,14 +1,11 @@
 import { dbKey } from 'src/boot/database';
-import { Company } from 'src/modals/Company';
-import { Job } from 'src/modals/Job';
-import { Person } from 'src/modals/Person';
 import { inject, ref } from 'vue';
 
 export function useDatabase() {
-  const job = ref<Job>();
-  const company = ref<Company>();
-  const peopleJob = ref<Person[]>();
-  const peopleCompany = ref<Person[]>();
+  const job = ref();
+  const company = ref();
+  const peopleJob = ref();
+  const peopleCompany = ref();
 
   const db = inject(dbKey);
   async function query() {

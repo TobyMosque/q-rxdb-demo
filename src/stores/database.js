@@ -1,23 +1,21 @@
 import { defineStore } from 'pinia';
-import { Company } from 'src/modals/Company';
-import { Job } from 'src/modals/Job';
-import { Person } from 'src/modals/Person';
-
-interface State {
-  job?: Job;
-  company?: Company;
-  peopleJob: Person[];
-  peopleCompany: Person[];
-}
 
 export const useDatabaseStore = defineStore('database', {
-  state: () =>
-    ({
-      job: undefined,
-      company: undefined,
-      peopleJob: [],
-      peopleCompany: [],
-    } as State),
+  /**
+   *
+   * @returns {{
+   *   job: import('src/models/Job').Job
+   *   company: import('src/models/Company').Company
+   *   peopleJob: import('src/models/Person').Person[]
+   *   peopleCompany: import('src/models/Person').Person[]
+   * }}
+   */
+  state: () => ({
+    job: undefined,
+    company: undefined,
+    peopleJob: [],
+    peopleCompany: [],
+  }),
   actions: {
     async query() {
       const companyIndex = Math.floor(Math.random() * Math.floor(50));

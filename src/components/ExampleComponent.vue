@@ -12,18 +12,25 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, ref } from 'vue';
-import { Todo, Meta } from './models';
 
-interface Props {
-  title: string;
-  todos?: Todo[];
-  meta: Meta;
-  active: boolean;
-}
-const props = withDefaults(defineProps<Props>(), {
-  todos: () => [],
+const props = defineProps({
+  title: {
+    type: String,
+    required: true,
+  },
+  todos: {
+    type: Array,
+    default() {
+      return [];
+    },
+  },
+  meta: Object,
+  active: {
+    type: String,
+    required: true,
+  },
 });
 
 const clickCount = ref(0);
@@ -33,5 +40,4 @@ function increment() {
 }
 
 const todoCount = computed(() => props.todos.length);
-
 </script>

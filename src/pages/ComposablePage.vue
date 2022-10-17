@@ -5,7 +5,7 @@
   </q-page>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { useDatabase } from 'src/compasables/database';
 
 const databaseModule = useDatabase();
