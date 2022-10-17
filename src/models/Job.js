@@ -1,7 +1,8 @@
-export const jobSchema = {
+import { createScheme } from './factory';
+
+export const jobSchema = createScheme('job', {
   title: 'job schema',
   description: 'describes a job',
-  version: 0,
   primaryKey: 'jobId',
   type: 'object',
   properties: {
@@ -20,4 +21,4 @@ export const jobSchema = {
   },
   required: ['jobId', 'name', 'updatedAt', '_deleted'],
   indexes: ['name', '_deleted', 'updatedAt'],
-};
+});

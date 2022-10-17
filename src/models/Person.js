@@ -1,7 +1,8 @@
-export const personSchema = {
+import { createScheme } from './factory';
+
+export const personSchema = createScheme('person', {
   title: 'person schema',
   description: 'describes a person',
-  version: 0,
   primaryKey: 'personId',
   type: 'object',
   properties: {
@@ -47,4 +48,4 @@ export const personSchema = {
     '_deleted',
   ],
   indexes: ['company', 'job', 'firstName', 'email', '_deleted', 'updatedAt'],
-};
+});

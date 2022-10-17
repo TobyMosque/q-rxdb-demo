@@ -1,7 +1,8 @@
-export const companySchema = {
+import { createScheme } from './factory';
+
+export const companySchema = createScheme('company', {
   title: 'company schema',
   description: 'describes a company',
-  version: 0,
   primaryKey: 'companyId',
   type: 'object',
   properties: {
@@ -19,5 +20,5 @@ export const companySchema = {
     },
   },
   required: ['companyId', 'name', 'updatedAt', '_deleted'],
-  indexes: ['name', '_deleted', 'updatedAt'],
-};
+  indexes: ['_deleted', 'updatedAt'],
+});
