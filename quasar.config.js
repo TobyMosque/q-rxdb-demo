@@ -10,6 +10,18 @@
 
 const { configure } = require('quasar/wrappers');
 
+function merge(source, target) {
+  for (const [key, value] of Object.entries(target)) {
+    if (typeof value === 'object') {
+      if (!source[key]) source[key] = Array.isArray(value) ? [] : {};
+      merge(source[key], value);
+    } else {
+      source[key] = value;
+    }
+  }
+  return source;
+}
+
 module.exports = configure(function (/* ctx */) {
   return {
     eslint: {
@@ -69,7 +81,17 @@ module.exports = configure(function (/* ctx */) {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        merge(viteConf, {
+          optimizeDeps: {
+            esbuildOptions: {
+              define: {
+                global: 'globalThis',
+              },
+            },
+          },
+        });
+      },
       // viteVuePluginOptions: {},
 
       // vitePlugins: [
