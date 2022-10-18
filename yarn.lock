@@ -2208,6 +2208,11 @@ generate-object-property@^1.1.0:
   dependencies:
     is-property "^1.0.0"
 
+generate-passphrase@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/generate-passphrase/-/generate-passphrase-1.2.0.tgz#d520e3485fa8c48d5e7129956d960993749fd6ae"
+  integrity sha512-RZZdKMlE+0baX3ukATStWAOBOJPPzvpoF1+5SdYt9DSLogF91FPx+ARaAjpkX/b7xqD4/uUGNCkBdFcl1PS9FQ==
+
 get-caller-file@^2.0.5:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"

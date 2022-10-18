@@ -5,9 +5,12 @@ import { Person, personSchema } from 'src/models/Person';
 import { Job, jobSchema } from 'src/models/Job';
 import { Company, companySchema } from 'src/models/Company';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
+import { RxDBLeaderElectionPlugin } from 'rxdb/plugins/leader-election';
 import { InjectionKey } from 'vue';
+import { wrappedKeyEncryptionStorage } from 'rxdb/plugins/encryption';
 
 import { seed } from './database/seed';
+import { Dialog } from 'quasar';
 
 interface Collections {
   person: RxCollection<Person>;
@@ -35,10 +38,18 @@ export default boot(async ({ app, store }) => {
     addRxPlugin(RxDBDevModePlugin);
   }
   addRxPlugin(RxDBUpdatePlugin);
+  addRxPlugin(RxDBLeaderElectionPlugin);
 
+  confirm('ask the password to the user');
+
+  const secret = 'KeetItSuperSecret$512';
   const db: Database = await createRxDatabase<Collections>({
     name: 'peopledb',
-    storage: getRxStorageDexie(),
+    storage: wrappedKeyEncryptionStorage({
+      storage: getRxStorageDexie(),
+    }),
+    password: window.getPassword(secret),
+    multiInstance: true,
   });
 
   function entityHooks<T extends Entity>(collection: RxCollection<T>) {

@@ -1,5 +1,18 @@
 import { RxDocument, RxQuery } from 'rxdb';
+import { Database } from 'src/boot/database';
 import { computed, Ref } from 'vue';
+
+export async function useElection<T>(
+  db: Database,
+  callback: () => Promise<T> | T
+): Promise<T> {
+  try {
+    db.waitForLeadership();
+    return await callback();
+  } finally {
+    db.leaderElector();
+  }
+}
 
 export async function useQuery<T>(
   doc: Ref<T | undefined> | undefined,
@@ -11,7 +24,9 @@ export async function useQuery<T>(
   const items = await query().exec();
   const item = Array.isArray(items) ? items[0] : items;
   doc.value = item.toMutableJSON();
-  item.$.subscribe(() => {
+  console.log('sync setup: ', item);
+  item.$.subscribe((evt) => {
+    console.log('sync: ', evt);
     doc.value = item.toMutableJSON();
   });
 }

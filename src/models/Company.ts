@@ -25,7 +25,8 @@ const companySchemaLiteral = {
     },
   },
   required: ['companyId', 'name'],
-  indexes: ['name', '_deleted', 'updatedAt'],
+  indexes: ['_deleted', 'updatedAt'],
+  encrypted: ['name'] as never,
 } as const; // <- It is important to set 'as const' to preserve the literal type
 const schemaTyped = toTypedRxJsonSchema(companySchemaLiteral);
 

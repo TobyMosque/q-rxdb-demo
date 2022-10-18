@@ -62,7 +62,9 @@ module.exports = configure(function (/* ctx */) {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: {
+        DB_PASSWORD: '123qwe456RTY',
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,

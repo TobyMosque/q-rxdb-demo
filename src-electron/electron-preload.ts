@@ -27,3 +27,26 @@
  *   }
  * }
  */
+
+import { ipcRenderer, contextBridge } from 'electron';
+
+/* const algorithm = 'aes-256-cbc'; */
+function getPassword(secret: string) {
+  let encrypted = ipcRenderer.sendSync('read-password');
+  let passphrase = '';
+  if (!encrypted) {
+    const passphrase = ipcRenderer.sendSync('generate-password');
+    encrypted = ipcRenderer.sendSync('encrypt', secret, passphrase);
+    ipcRenderer.sendSync('save-password', encrypted);
+  } else {
+    passphrase = ipcRenderer.sendSync('decrypt', secret, encrypted);
+  }
+  return passphrase;
+}
+
+declare global {
+  interface Window {
+    getPassword: typeof getPassword;
+  }
+}
+contextBridge.exposeInMainWorld('getPassword', getPassword);

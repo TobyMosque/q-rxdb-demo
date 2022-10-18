@@ -1,6 +1,9 @@
-import { app, BrowserWindow, nativeTheme } from 'electron';
+import { app, BrowserWindow, nativeTheme, ipcMain } from 'electron';
 import path from 'path';
 import os from 'os';
+import { createHash, createCipheriv, createDecipheriv } from 'crypto';
+import { readFileSync, writeFileSync } from 'fs';
+import { generate } from 'generate-passphrase';
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -46,6 +49,58 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = undefined;
   });
+
+  function generateKeys(secret: string) {
+    return {
+      key: createHash('sha256').update(secret).digest(),
+      iv: createHash('md5').update(secret).digest(),
+    };
+  }
+  ipcMain.on('generate-key-iv', function (evt, secret) {
+    evt.returnValue = generateKeys(secret);
+  });
+  ipcMain.on('read-password', function (evt) {
+    try {
+      evt.returnValue = readFileSync('credentials', 'utf-8');
+    } catch {
+      evt.returnValue = '';
+    }
+  });
+  ipcMain.on('save-password', function (evt, text) {
+    writeFileSync('credentials', text, { encoding: 'utf-8' });
+    evt.returnValue = true;
+  });
+  ipcMain.on('generate-password', function (evt) {
+    evt.returnValue = generate({ length: 16, separator: '_', numbers: false });
+  });
+
+  const algorithm = 'aes-256-cbc';
+  ipcMain.on('encrypt', function (evt, secret, password) {
+    const { key, iv } = generateKeys(secret);
+    const cipher = createCipheriv(algorithm, Buffer.from(key), iv);
+    const encrypted = Buffer.concat([cipher.update(password), cipher.final()]);
+    evt.returnValue = encrypted.toString('base64');
+  });
+
+  ipcMain.on('decrypt', function (evt, secret, encrypted) {
+    const { key, iv } = generateKeys(secret);
+    const binary = Buffer.from(encrypted, 'base64');
+    const decipher = createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
+    const decrypted = Buffer.concat([
+      decipher.update(binary),
+      decipher.final(),
+    ]);
+    evt.returnValue = decrypted.toString();
+  });
+
+  /*
+  function encrypt(text) {
+   let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
+   let encrypted = cipher.update(text);
+   encrypted = Buffer.concat([encrypted, cipher.final()]);
+   return { iv: iv.toString('hex'), encryptedData: encrypted.toString('hex') };
+}
+  */
 }
 
 app.whenReady().then(createWindow);
