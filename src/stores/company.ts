@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { useElection, useQuery } from 'src/compasables/query';
+import { useGetDb, useQuery } from 'src/compasables/query';
 import { Company } from 'src/models/Company';
 import { toRefs } from 'vue';
 
@@ -23,16 +23,17 @@ export const useCompanyStore = defineStore('company', {
       const { company } = toRefs(this.$state);
 
       const companyIndex = 0; //Math.floor(Math.random() * Math.floor(50));
-      await useElection(this.$db, async () => {
+      await useGetDb(this.getDb, async (db) => {
         await useQuery(company, () =>
-          this.$db.company.find({ limit: 1, skip: companyIndex })
+          db.company.find({ limit: 1, skip: companyIndex })
         );
       });
     },
-    startInterval() {
-      set(async () => {
-        await useElection(this.$db, async () => {
-          const rxDoc = await this.$db.company
+    async startInterval() {
+      const db = await this.getDb();
+      setInterval(async () => {
+        await useGetDb(this.getDb, async (db) => {
+          const rxDoc = await db.company
             .findOne(this.company?.companyId)
             .exec();
           await rxDoc?.update({

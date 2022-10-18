@@ -2,13 +2,14 @@ import { RxDocument, RxQuery } from 'rxdb';
 import { Database } from 'src/boot/database';
 import { computed, Ref } from 'vue';
 
-export async function useElection<T>(
-  db: Database,
-  callback: () => Promise<T> | T
+export async function useGetDb<T>(
+  getDb: () => Promise<Database>,
+  callback: (db: Database) => Promise<T> | T
 ): Promise<T> {
+  const db = await getDb();
   try {
     db.waitForLeadership();
-    return await callback();
+    return await callback(db);
   } finally {
     db.leaderElector();
   }

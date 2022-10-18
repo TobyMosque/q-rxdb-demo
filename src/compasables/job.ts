@@ -1,7 +1,7 @@
-import { dbKey } from 'src/boot/database';
+import { getDbKey } from 'src/boot/database';
 import { Job } from 'src/models/Job';
 import { computed, inject, ref } from 'vue';
-import { useElection, useQuery } from './query';
+import { useGetDb, useQuery } from './query';
 
 export function useJob() {
   const job = ref<Job>();
@@ -10,24 +10,19 @@ export function useJob() {
     return updatedAt ? new Date(updatedAt).toLocaleString() : 'N/A';
   });
 
-  const db = inject(dbKey);
+  const getDb = inject(getDbKey);
   async function init() {
-    if (!db) {
-      return;
-    }
-    await useElection(db, async () => {
+    if (!getDb) return;
+    await useGetDb(getDb, async (db) => {
       const jobIndex = 0; //Math.floor(Math.random() * Math.floor(50));
       await useQuery(job, () => db.job.find({ limit: 1, skip: jobIndex }));
     });
   }
 
   function startInterval() {
-    if (!db) {
-      return;
-    }
-
+    if (!getDb) return;
     setInterval(async () => {
-      await useElection(db, async () => {
+      await useGetDb(getDb, async (db) => {
         const rxDoc = await db.job.findOne(job.value?.jobId).exec();
         await rxDoc?.update({
           $set: {},

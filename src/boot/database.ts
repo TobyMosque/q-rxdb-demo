@@ -20,7 +20,7 @@ interface Collections {
 export type Database = RxDatabase<Collections>;
 declare module 'pinia' {
   export interface PiniaCustomProperties {
-    $db: Database;
+    getDb: () => Promise<Database>;
   }
 }
 
@@ -29,7 +29,8 @@ interface Entity {
   updatedAt?: number;
 }
 
-export const dbKey: InjectionKey<Database> = Symbol('api-key');
+export const getDbKey: InjectionKey<() => Promise<Database>> =
+  Symbol('get-db-key');
 // "async" is optional;
 // more info on params: https://v2.quasar.dev/quasar-cli/boot-files
 export default boot(async ({ app, store }) => {
@@ -40,55 +41,69 @@ export default boot(async ({ app, store }) => {
   addRxPlugin(RxDBUpdatePlugin);
   addRxPlugin(RxDBLeaderElectionPlugin);
 
-  confirm('ask the password to the user');
+  let db: Database;
+  async function getDb() {
+    if (db) {
+      return db;
+    }
 
-  const secret = 'KeetItSuperSecret$512';
-  const db: Database = await createRxDatabase<Collections>({
-    name: 'peopledb',
-    storage: wrappedKeyEncryptionStorage({
-      storage: getRxStorageDexie(),
-    }),
-    password: window.getPassword(secret),
-    multiInstance: true,
-  });
+    await new Promise((resolve) =>
+      Dialog.create({
+        message: 'you would ask the user by the password here',
+      }).onOk(resolve)
+    );
 
-  function entityHooks<T extends Entity>(collection: RxCollection<T>) {
-    collection.preInsert((data: T) => {
-      data._deleted = false;
-      data.updatedAt = new Date().getTime();
-    }, false);
+    const secret = 'KeetItSuperSecret$512';
+    db = await createRxDatabase<Collections>({
+      name: 'peopledb',
+      storage: wrappedKeyEncryptionStorage({
+        storage: getRxStorageDexie(),
+      }),
+      password: window.getPassword(secret),
+      multiInstance: true,
+    });
 
-    collection.preSave((data: T, doc: unknown) => {
-      console.log('saved: ', data, doc);
-      data.updatedAt = new Date().getTime();
-    }, false);
+    function entityHooks<T extends Entity>(collection: RxCollection<T>) {
+      collection.preInsert((data: T) => {
+        data._deleted = false;
+        data.updatedAt = new Date().getTime();
+      }, false);
 
-    collection.preRemove((data: T, doc: unknown) => {
-      console.log('removed: ', data, doc);
-      data._deleted = true;
-      data.updatedAt = new Date().getTime();
-    }, false);
+      collection.preSave((data: T, doc: unknown) => {
+        console.log('saved: ', data, doc);
+        data.updatedAt = new Date().getTime();
+      }, false);
+
+      collection.preRemove((data: T, doc: unknown) => {
+        console.log('removed: ', data, doc);
+        data._deleted = true;
+        data.updatedAt = new Date().getTime();
+      }, false);
+    }
+
+    await db.addCollections({
+      person: {
+        schema: personSchema,
+      },
+      job: {
+        schema: jobSchema,
+      },
+      company: {
+        schema: companySchema,
+      },
+    });
+
+    entityHooks(db.person);
+    entityHooks(db.job);
+    entityHooks(db.company);
+
+    await seed(db);
+    return db;
   }
+  // this secret would be provided by the user;
 
-  await db.addCollections({
-    person: {
-      schema: personSchema,
-    },
-    job: {
-      schema: jobSchema,
-    },
-    company: {
-      schema: companySchema,
-    },
-  });
-
-  entityHooks(db.person);
-  entityHooks(db.job);
-  entityHooks(db.company);
-
-  await seed(db);
-  app.provide(dbKey, db);
+  app.provide(getDbKey, getDb);
   store.use(() => ({
-    $db: db,
+    getDb: getDb,
   }));
 });

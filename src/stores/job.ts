@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { useElection, useQuery } from 'src/compasables/query';
+import { useGetDb, useQuery } from 'src/compasables/query';
 import { Job } from 'src/models/Job';
 import { toRefs } from 'vue';
 
@@ -23,16 +23,16 @@ export const useJobStore = defineStore('job', {
       const { job } = toRefs(this.$state);
 
       const companyIndex = 0; //Math.floor(Math.random() * Math.floor(50));
-      await useElection(this.$db, async () => {
+      await useGetDb(this.getDb, async (db) => {
         await useQuery(job, () =>
-          this.$db.job.find({ limit: 1, skip: companyIndex })
+          db.job.find({ limit: 1, skip: companyIndex })
         );
       });
     },
     startInterval() {
       setInterval(async () => {
-        await useElection(this.$db, async () => {
-          const rxDoc = await this.$db.company.findOne(this.job?.jobId).exec();
+        await useGetDb(this.getDb, async (db) => {
+          const rxDoc = await db.company.findOne(this.job?.jobId).exec();
           await rxDoc?.update({
             $set: {},
           });

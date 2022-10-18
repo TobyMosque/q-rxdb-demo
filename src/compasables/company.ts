@@ -1,7 +1,7 @@
-import { dbKey } from 'src/boot/database';
+import { getDbKey } from 'src/boot/database';
 import { Company } from 'src/models/Company';
 import { computed, inject, ref } from 'vue';
-import { useElection, useQuery } from './query';
+import { useGetDb, useQuery } from './query';
 
 export function useCompany() {
   const company = ref<Company>();
@@ -10,12 +10,10 @@ export function useCompany() {
     return updatedAt ? new Date(updatedAt).toLocaleString() : 'N/A';
   });
 
-  const db = inject(dbKey);
+  const getDb = inject(getDbKey);
   async function init() {
-    if (!db) {
-      return;
-    }
-    await useElection(db, async () => {
+    if (!getDb) return;
+    await useGetDb(getDb, async (db) => {
       const jobIndex = 0; //Math.floor(Math.random() * Math.floor(50));
       await useQuery(company, () =>
         db.company.find({ limit: 1, skip: jobIndex })
@@ -24,12 +22,9 @@ export function useCompany() {
   }
 
   function startInterval() {
-    if (!db) {
-      return;
-    }
-
+    if (!getDb) return;
     setInterval(async () => {
-      await useElection(db, async () => {
+      await useGetDb(getDb, async (db) => {
         const rxDoc = await db.company.findOne(company.value?.companyId).exec();
         await rxDoc?.update({
           $set: {},

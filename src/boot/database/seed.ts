@@ -4,7 +4,7 @@ import { uid } from 'quasar';
 import { Company } from 'src/models/Company';
 import { Job } from 'src/models/Job';
 import { Person } from 'src/models/Person';
-import { useElection } from 'src/compasables/query';
+import { useGetDb } from 'src/compasables/query';
 
 const _date = new Date();
 const avatars = {
@@ -37,84 +37,80 @@ export function comb({ date }: { date?: Date } = {}) {
 }
 
 export async function seed(db: Database) {
-  await useElection(db, async () => {
-    const companyDocs = await db.company.find({ limit: 1 }).exec();
-    if (!companyDocs?.length) {
-      const companies: Company[] = [];
-      for (let i = 0; i < 50; i++) {
-        let name = faker.company.companyName();
-        while (companies.some((j) => j.name === name)) {
-          name = faker.company.companyName();
-        }
-        companies.push({
-          companyId: comb(),
-          name: name,
-        });
+  const companyDocs = await db.company.find({ limit: 1 }).exec();
+  if (!companyDocs?.length) {
+    const companies: Company[] = [];
+    for (let i = 0; i < 50; i++) {
+      let name = faker.company.companyName();
+      while (companies.some((j) => j.name === name)) {
+        name = faker.company.companyName();
       }
-      await db.company.bulkInsert(companies);
+      companies.push({
+        companyId: comb(),
+        name: name,
+      });
     }
+    await db.company.bulkInsert(companies);
+  }
 
-    const jobDocs = await db.job.find({ limit: 1 }).exec();
-    if (!jobDocs?.length) {
-      const jobs: Job[] = [];
-      for (let i = 0; i < 50; i++) {
-        let name = faker.name.jobTitle();
-        while (jobs.some((j) => j.name === name)) {
-          name = faker.name.jobTitle();
-        }
-        jobs.push({
-          jobId: comb(),
-          name: name,
-        });
+  const jobDocs = await db.job.find({ limit: 1 }).exec();
+  if (!jobDocs?.length) {
+    const jobs: Job[] = [];
+    for (let i = 0; i < 50; i++) {
+      let name = faker.name.jobTitle();
+      while (jobs.some((j) => j.name === name)) {
+        name = faker.name.jobTitle();
       }
-      await db.job.bulkInsert(jobs);
+      jobs.push({
+        jobId: comb(),
+        name: name,
+      });
     }
+    await db.job.bulkInsert(jobs);
+  }
 
-    const peopleDocs = await db.person.find({ limit: 1 }).exec();
-    if (!peopleDocs?.length) {
-      const jobs: Job[] = await db.job.find().exec();
-      const companies: Company[] = await db.company.find().exec();
+  const peopleDocs = await db.person.find({ limit: 1 }).exec();
+  if (!peopleDocs?.length) {
+    const jobs: Job[] = await db.job.find().exec();
+    const companies: Company[] = await db.company.find().exec();
 
-      const people: Person[] = [];
-      for (let i = 0; i < 800; i++) {
-        const companyIndex = Math.floor(
-          Math.random() * Math.floor(companies.length)
-        );
-        const jobIndex = Math.floor(Math.random() * Math.floor(jobs.length));
-        const company = companies[companyIndex];
-        const job = jobs[jobIndex];
+    const people: Person[] = [];
+    for (let i = 0; i < 800; i++) {
+      const companyIndex = Math.floor(
+        Math.random() * Math.floor(companies.length)
+      );
+      const jobIndex = Math.floor(Math.random() * Math.floor(jobs.length));
+      const company = companies[companyIndex];
+      const job = jobs[jobIndex];
 
-        const gender: 'male' | 'female' = faker.helpers.arrayElement([
-          'male',
-          'female',
-        ]);
+      const gender: 'male' | 'female' = faker.helpers.arrayElement([
+        'male',
+        'female',
+      ]);
 
-        let firstName = faker.name.firstName(gender);
-        let lastName = faker.name.lastName(gender);
-        while (
-          people.some(
-            (j) => j.firstName === firstName && j.lastName === lastName
-          )
-        ) {
-          firstName = faker.name.firstName(gender);
-          lastName = faker.name.lastName(gender);
-        }
-        const section = gender === 'male' ? 'men' : 'women';
-        const index = faker.helpers.arrayElement(avatars[section]);
-        const avatar = `https://randomuser.me/api/portraits/${section}/${index}.jpg`;
-        const email = faker.internet.email(firstName, lastName).toLowerCase();
-
-        people.push({
-          personId: comb(),
-          avatar: avatar,
-          firstName: firstName,
-          lastName: lastName,
-          email: email,
-          company: company.companyId,
-          job: job.jobId,
-        });
+      let firstName = faker.name.firstName(gender);
+      let lastName = faker.name.lastName(gender);
+      while (
+        people.some((j) => j.firstName === firstName && j.lastName === lastName)
+      ) {
+        firstName = faker.name.firstName(gender);
+        lastName = faker.name.lastName(gender);
       }
-      await db.person.bulkInsert(people);
+      const section = gender === 'male' ? 'men' : 'women';
+      const index = faker.helpers.arrayElement(avatars[section]);
+      const avatar = `https://randomuser.me/api/portraits/${section}/${index}.jpg`;
+      const email = faker.internet.email(firstName, lastName).toLowerCase();
+
+      people.push({
+        personId: comb(),
+        avatar: avatar,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        company: company.companyId,
+        job: job.jobId,
+      });
     }
-  });
+    await db.person.bulkInsert(people);
+  }
 }
