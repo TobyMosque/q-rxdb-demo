@@ -14,7 +14,7 @@ const databaseModule = useDatabase();
 const { company } = databaseModule;
 
 async function query() {
-  await databaseModule.query();
+  await databaseModule.init();
 }
 
 const updatedAt = computed(() => {

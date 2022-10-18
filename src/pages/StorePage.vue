@@ -15,7 +15,7 @@ const databaseStore = useDatabaseStore();
 const { peopleCompany, peopleJob, job, company } = storeToRefs(databaseStore);
 
 async function query() {
-  await databaseStore.query();
+  await databaseStore.init();
   console.log({ peopleCompany, peopleJob, job, company });
 }
 

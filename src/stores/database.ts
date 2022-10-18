@@ -1,5 +1,4 @@
-import { defineStore, storeToRefs } from 'pinia';
-import { RxDocument, RxQuery } from 'rxdb';
+import { defineStore } from 'pinia';
 import { useArrayQuery, useQuery } from 'src/compasables/query';
 import { Company } from 'src/models/Company';
 import { Job } from 'src/models/Job';
@@ -21,22 +20,8 @@ export const useDatabaseStore = defineStore('database', {
       peopleJob: [],
       peopleCompany: [],
     } as State),
-  getters: {
-    peopleJobIndex(): Map<string, number> {
-      return this.peopleJob.reduce((map, person, index) => {
-        map.set(person.personId, index);
-        return map;
-      }, new Map<string, number>());
-    },
-    peopleCompanyIndex(): Map<string, number> {
-      return this.peopleCompany.reduce((map, person, index) => {
-        map.set(person.personId, index);
-        return map;
-      }, new Map<string, number>());
-    },
-  },
   actions: {
-    async query() {
+    async init() {
       const { job, company, peopleJob, peopleCompany } = toRefs(this.$state);
 
       const companyIndex = Math.floor(Math.random() * Math.floor(50));

@@ -12,7 +12,7 @@ export function useDatabase() {
   const peopleCompany = ref<Person[]>([]);
 
   const db = inject(dbKey);
-  async function query() {
+  async function init() {
     if (!db) {
       return;
     }
@@ -41,7 +41,7 @@ export function useDatabase() {
   }, 2000);
 
   return {
-    query,
+    init,
     job,
     company,
     peopleJob,
