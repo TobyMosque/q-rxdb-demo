@@ -54,12 +54,16 @@ export default boot(async ({ app, store }) => {
     );
 
     const secret = 'KeetItSuperSecret$512';
+    let password = secret;
+    if (process.env.MODE === 'electron') {
+      password = window.getPassword(secret);
+    }
     db = await createRxDatabase<Collections>({
       name: 'peopledb',
       storage: wrappedKeyEncryptionStorage({
         storage: getRxStorageDexie(),
       }),
-      password: window.getPassword(secret),
+      password: password,
       multiInstance: true,
     });
 

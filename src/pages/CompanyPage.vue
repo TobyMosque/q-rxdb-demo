@@ -20,15 +20,15 @@
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
-/*
 import { useCompany } from 'src/compasables/company';
 import { useJob } from 'src/compasables/job';
-*/
+/*
+import { storeToRefs } from 'pinia';
 import { useCompanyStore } from 'src/stores/company';
 import { useJobStore } from 'src/stores/job';
 import { computed } from 'vue';
-/*
+*/
+
 const jobStore = useJob();
 const companyStore = useCompany();
 
@@ -43,8 +43,8 @@ async function query() {
 async function interval() {
   await companyStore.startInterval();
 }
-*/
 
+/*
 const jobStore = useJobStore();
 const companyStore = useCompanyStore();
 
@@ -62,4 +62,5 @@ async function query() {
 async function interval() {
   await companyStore.startInterval();
 }
+*/
 </script>
