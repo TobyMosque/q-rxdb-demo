@@ -1,9 +1,9 @@
 import { Database } from '../database';
 import { faker } from '@faker-js/faker';
 import { uid } from 'quasar';
-import { Company } from 'src/modals/Company';
-import { Job } from 'src/modals/Job';
-import { Person } from 'src/modals/Person';
+import { Company } from 'src/models/Company';
+import { Job } from 'src/models/Job';
+import { Person } from 'src/models/Person';
 
 const _date = new Date();
 const avatars = {
@@ -48,8 +48,6 @@ export async function seed(db: Database) {
       companies.push({
         companyId: comb(),
         name: name,
-        _deleted: false,
-        updatedAt: new Date().getTime(),
       });
     }
     await db.company.bulkInsert(companies);
@@ -66,8 +64,6 @@ export async function seed(db: Database) {
       jobs.push({
         jobId: comb(),
         name: name,
-        _deleted: false,
-        updatedAt: new Date().getTime(),
       });
     }
     await db.job.bulkInsert(jobs);
@@ -113,8 +109,6 @@ export async function seed(db: Database) {
         email: email,
         company: company.companyId,
         job: job.jobId,
-        _deleted: false,
-        updatedAt: new Date().getTime(),
       });
     }
     await db.person.bulkInsert(people);

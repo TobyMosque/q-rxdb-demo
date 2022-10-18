@@ -4,14 +4,14 @@ import {
   RxJsonSchema,
 } from 'rxdb';
 
-const companySchemaLiteral = {
-  title: 'company schema',
-  description: 'describes a company',
+const jobSchemaLiteral = {
+  title: 'job schema',
+  description: 'describes a job',
   version: 0,
-  primaryKey: 'companyId',
+  primaryKey: 'jobId',
   type: 'object',
   properties: {
-    companyId: {
+    jobId: {
       type: 'string',
     },
     name: {
@@ -24,13 +24,11 @@ const companySchemaLiteral = {
       type: 'boolean',
     },
   },
-  required: ['companyId', 'name', 'updatedAt', '_deleted'],
+  required: ['jobId', 'name'],
   indexes: ['name', '_deleted', 'updatedAt'],
 } as const; // <- It is important to set 'as const' to preserve the literal type
-const schemaTyped = toTypedRxJsonSchema(companySchemaLiteral);
+const schemaTyped = toTypedRxJsonSchema(jobSchemaLiteral);
 
 // aggregate the document type from the schema
-export type Company = ExtractDocumentTypeFromTypedRxJsonSchema<
-  typeof schemaTyped
->;
-export const companySchema: RxJsonSchema<Company> = companySchemaLiteral;
+export type Job = ExtractDocumentTypeFromTypedRxJsonSchema<typeof schemaTyped>;
+export const jobSchema: RxJsonSchema<Job> = jobSchemaLiteral;

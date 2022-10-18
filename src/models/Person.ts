@@ -49,10 +49,8 @@ const personSchemaLiteral = {
     'email',
     'company',
     'job',
-    'updatedAt',
-    '_deleted',
   ],
-  indexes: ['company', 'job', 'firstName', 'email', '_deleted', 'updatedAt'],
+  indexes: ['company', 'job', 'firstName', 'email'],
 } as const; // <- It is important to set 'as const' to preserve the literal type
 const schemaTyped = toTypedRxJsonSchema(personSchemaLiteral);
 
