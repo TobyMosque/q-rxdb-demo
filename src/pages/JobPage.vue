@@ -20,16 +20,8 @@
 </template>
 
 <script setup lang="ts">
-/*
-import { storeToRefs } from 'pinia';
-*/
-import { useCompany } from 'src/compasables/company';
-import { useJob } from 'src/compasables/job';
-/*
-import { useCompanyStore } from 'src/stores/company';
-import { useJobStore } from 'src/stores/job';
-import { computed } from 'vue';
-*/
+import { useCompany } from 'src/stores/company';
+import { useJob } from 'src/stores/job';
 
 const jobStore = useJob();
 const companyStore = useCompany();
@@ -38,31 +30,11 @@ const { job, updatedAt: jobUpdatedAt } = jobStore;
 const { company, updatedAt: companyUpdatedAt } = companyStore;
 
 async function query() {
-  await jobStore.init();
-  await companyStore.init();
+  await jobStore.init(0);
+  await companyStore.init(0);
 }
 
-async function interval() {
-  await jobStore.startInterval();
+function interval() {
+  jobStore.startInterval();
 }
-
-/*
-const jobStore = useJobStore();
-const companyStore = useCompanyStore();
-
-const { job } = storeToRefs(jobStore);
-const { company } = storeToRefs(companyStore);
-
-const jobUpdatedAt = computed(() => jobStore.updatedAt);
-const companyUpdatedAt = computed(() => companyStore.updatedAt);
-
-async function query() {
-  await jobStore.init();
-  await companyStore.init();
-}
-
-async function interval() {
-  await jobStore.startInterval();
-}
-*/
 </script>

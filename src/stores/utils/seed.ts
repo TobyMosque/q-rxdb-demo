@@ -1,10 +1,9 @@
-import { Database } from '../database';
+import { Database } from '../store';
 import { faker } from '@faker-js/faker';
 import { uid } from 'quasar';
 import { Company } from 'src/models/Company';
 import { Job } from 'src/models/Job';
 import { Person } from 'src/models/Person';
-import { useGetDb } from 'src/compasables/query';
 
 const _date = new Date();
 const avatars = {

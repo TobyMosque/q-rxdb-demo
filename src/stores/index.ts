@@ -1,17 +1,10 @@
-import { store } from 'quasar/wrappers'
-import { createPinia } from 'pinia'
-import { Router } from 'vue-router';
-
+import { store } from 'quasar/wrappers';
+import createStore, { StoreOptions } from './store';
 /*
  * When adding new properties to stores, you should also
  * extend the `PiniaCustomProperties` interface.
  * @see https://pinia.vuejs.org/core-concepts/plugins.html#typing-new-store-properties
  */
-declare module 'pinia' {
-  export interface PiniaCustomProperties {
-    readonly router: Router;
-  }
-}
 
 /*
  * If not building with SSR mode, you can
@@ -21,12 +14,33 @@ declare module 'pinia' {
  * async/await or return a Promise which resolves
  * with the Store instance.
  */
+import { Dialog } from 'quasar';
 
 export default store((/* { ssrContext } */) => {
-  const pinia = createPinia()
-
   // You can add Pinia plugins here
   // pinia.use(SomePiniaPlugin)
+  const options: StoreOptions = {
+    compression: true,
+    encryption: true,
+  };
 
-  return pinia
-})
+  if (process.env.MODE === 'electron') {
+    options.getPasswordAsync = async () => {
+      await new Promise((resolve) =>
+        Dialog.create({
+          message: 'you would ask the user by the password here',
+        }).onOk(resolve)
+      );
+
+      const secret = 'KeetItSuperSecret$512';
+      return window.getPassword(secret);
+    };
+  } else {
+    options.getPassword = () => {
+      return 'KeetItSuperSecret$512';
+    };
+  }
+
+  const store = createStore(options);
+  return store;
+});

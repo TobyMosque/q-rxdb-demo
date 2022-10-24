@@ -1,46 +1,48 @@
-import { defineStore } from 'pinia';
-import { useGetDb, useQuery } from 'src/compasables/query';
 import { Company } from 'src/models/Company';
-import { toRefs } from 'vue';
+import { computed, toRefs } from 'vue';
+import { Database, defineState, useStore } from './store';
 
 interface State {
   company?: Company;
 }
 
-export const useCompanyStore = defineStore('company', {
-  state: () =>
+export const useCompanyState = defineState(
+  'company',
+  () =>
     ({
       company: undefined,
-    } as State),
-  getters: {
-    updatedAt(): string {
-      const updatedAt = this.company?.updatedAt;
-      return updatedAt ? new Date(updatedAt).toLocaleString() : 'N/A';
-    },
-  },
-  actions: {
-    async init() {
-      const { company } = toRefs(this.$state);
+    } as State)
+);
 
-      const companyIndex = 0; //Math.floor(Math.random() * Math.floor(50));
-      await useGetDb(this.getDb, async (db) => {
-        await useQuery(company, () =>
-          db.company.find({ limit: 1, skip: companyIndex })
-        );
+export function useCompany() {
+  const store = useStore();
+  const state = useCompanyState();
+
+  const updatedAt = computed(() => {
+    const updatedAt = state.company?.updatedAt;
+    return updatedAt ? new Date(updatedAt).toLocaleString() : 'N/A';
+  });
+
+  async function init(index: number) {
+    const db = await store.getDb();
+    const doc = await db.company.findOne({ skip: index }).exec();
+    state.company = doc?.ref as never;
+  }
+
+  function startInterval() {
+    setInterval(async () => {
+      const db = await store.getDb();
+      const rxDoc = await db.company.findOne(state.company?.companyId).exec();
+      await rxDoc?.update({
+        $set: {},
       });
-    },
-    async startInterval() {
-      const db = await this.getDb();
-      setInterval(async () => {
-        await useGetDb(this.getDb, async (db) => {
-          const rxDoc = await db.company
-            .findOne(this.company?.companyId)
-            .exec();
-          await rxDoc?.update({
-            $set: {},
-          });
-        });
-      }, 2000);
-    },
-  },
-});
+    }, 2000);
+  }
+
+  return {
+    ...toRefs(state),
+    init,
+    startInterval,
+    updatedAt,
+  };
+}

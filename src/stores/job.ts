@@ -1,43 +1,44 @@
-import { defineStore } from 'pinia';
-import { useGetDb, useQuery } from 'src/compasables/query';
 import { Job } from 'src/models/Job';
-import { toRefs } from 'vue';
+import { computed, toRefs } from 'vue';
+import { defineState, useStore } from './store';
 
 interface State {
   job?: Job;
 }
 
-export const useJobStore = defineStore('job', {
-  state: () =>
-    ({
-      job: undefined,
-    } as State),
-  getters: {
-    updatedAt(): string {
-      const updatedAt = this.job?.updatedAt;
-      return updatedAt ? new Date(updatedAt).toLocaleString() : 'N/A';
-    },
-  },
-  actions: {
-    async init() {
-      const { job } = toRefs(this.$state);
+export const useJobState = defineState<State>('job', () => ({
+  job: undefined,
+}));
 
-      const companyIndex = 0; //Math.floor(Math.random() * Math.floor(50));
-      await useGetDb(this.getDb, async (db) => {
-        await useQuery(job, () =>
-          db.job.find({ limit: 1, skip: companyIndex })
-        );
+export function useJob() {
+  const store = useStore();
+  const state = useJobState();
+
+  const updatedAt = computed(() => {
+    const updatedAt = state.job?.updatedAt;
+    return updatedAt ? new Date(updatedAt).toLocaleString() : 'N/A';
+  });
+
+  async function init(index: number) {
+    const db = await store.getDb();
+    const doc = await db.job.findOne({ skip: index }).exec();
+    state.job = doc?.ref as never;
+  }
+
+  function startInterval() {
+    setInterval(async () => {
+      const db = await store.getDb();
+      const rxDoc = await db.job.findOne(state.job?.jobId).exec();
+      await rxDoc?.update({
+        $set: {},
       });
-    },
-    startInterval() {
-      setInterval(async () => {
-        await useGetDb(this.getDb, async (db) => {
-          const rxDoc = await db.company.findOne(this.job?.jobId).exec();
-          await rxDoc?.update({
-            $set: {},
-          });
-        });
-      }, 2000);
-    },
-  },
-});
+    }, 2000);
+  }
+
+  return {
+    ...toRefs(state),
+    init,
+    startInterval,
+    updatedAt,
+  };
+}
